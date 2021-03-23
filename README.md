@@ -23,5 +23,7 @@ Set `ETHERSCAN_KEY` and `ALCHEMY_KEY` variables in `.env` file
 
 ## Scripts
 
-[twap.py](./twap.py) calculates TWAP for Uniswap/Sushiswap pools. This requires access to Ethereum archive node (e.g. [Alchemy](https://www.alchemyapi.io/)
+[twap.py](./twap.py) calculates TWAP for Uniswap/Sushiswap pools. This requires access to Ethereum archive node (e.g. [Alchemy](https://www.alchemyapi.io/))
+
+[compound_repay.py](./compound_repay.py) calculates expected Compound borrow balance in future. Useful when planning to repay only interest amount and keep principal balance fixed.
 
