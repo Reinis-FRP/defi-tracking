@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import json
 from web3 import Web3
 from dotenv import load_dotenv
 import requests
@@ -32,6 +33,9 @@ DECIMALS = 18
 
 # Use the same ABI for all EMP contracts (will fetch it for the first EMP discovered):
 emp_abi = []
+
+# Cache json file
+cache_file = 'cache.json'
 
 def load_abi(abi_address):
   API_ENDPOINT = etherscan_api+"?module=contract&action=getabi&address="+str(abi_address)+"&apikey="+etherscan_key
@@ -90,7 +94,16 @@ registry_contract = load_contract(registry_address)
 
 all_registered_contracts = registry_contract.functions.getAllRegisteredContracts().call()
 
+try:
+  with open(cache_file, 'r') as f:
+    cache = json.load(f)
+except FileNotFoundError:
+  cache = {}
+
 for registered_address in all_registered_contracts:
+  if registered_address in cache:
+    print(json.dumps(cache[registered_address], indent=2))
+    continue
   creation = load_creation(registered_address)
   if creation and creation["deployer"]:
     if emp_abi == []:
@@ -137,4 +150,27 @@ for registered_address in all_registered_contracts:
     withdrawal_liveness = emp_contract.functions.withdrawalLiveness().call()
     print('  Withdrawal liveness: %f hours' % (withdrawal_liveness / 3600))
 
- 
+    cache[registered_address] = {
+        'deployer': creation['deployer'],
+        'deployed_at': creation['create_time'],
+        'collateral_requirement': collateral_requirement,
+        'contract_state': emp_state,
+        'expires_at': expiration,
+        'price_id': price_identifier,
+        'min_sponsor_tokens': min_sponsor_tokens,
+        'liquidation_liveness': liquidation_liveness,
+        'withdrawal_liveness': withdrawal_liveness,
+        'collateral': {
+            'address': collateral_address,
+            'symbol': collateral_symbol,
+            'decimals': collateral_decimals
+        },
+        'synth': {
+            'address': synth_address,
+            'symbol': synth_symbol,
+            'decimals': synth_decimals,
+        },
+    }
+
+with open(cache_file, 'w') as f:
+  json.dump(cache, f)
