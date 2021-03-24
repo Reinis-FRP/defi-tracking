@@ -137,5 +137,4 @@ for registered_address in all_registered_contracts:
     withdrawal_liveness = emp_contract.functions.withdrawalLiveness().call()
     print('  Withdrawal liveness: %f hours' % (withdrawal_liveness / 3600))
 
-#    print(registered_address, datetime.datetime.utcfromtimestamp(creation["create_time"]), creation["deployer"], collateral_symbol, synth_symbol, collateral_requirement, emp_state, datetime.datetime.utcfromtimestamp(expiration), liquidation_liveness / 3600, min_sponsor_tokens, price_identifier, withdrawal_liveness / 3600)
  

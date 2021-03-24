@@ -27,3 +27,10 @@ Set `ETHERSCAN_KEY` and `ALCHEMY_KEY` variables in `.env` file
 
 [compound_repay.py](./compound_repay.py) calculates expected Compound borrow balance in future. Useful when planning to repay only interest amount and keep principal balance fixed.
 
+[track_emp.py](./track_emp.py) fetches all deployed EMP contracts and their parameters from on-chain data.
+
+TODO:
+
+* optimize fetching all parameters from create transaction
+* format output as CSV
+* add current minted amounts and collateral locked
