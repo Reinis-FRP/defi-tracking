@@ -1,0 +1,300 @@
+{
+ "last_umip": 68,
+ "price_id_coingecko":
+  {
+   "AAVEUSD":
+    {
+     "id": "aave",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "AMPLUSD":
+    {
+     "id": "ampleforth",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "AMPLUSD_18DEC":
+    {
+     "id": "ampleforth",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "BCHNBTC":
+    {
+     "id": "bitcoin-cash",
+     "vs_currency": "btc",
+     "inverse": false
+    }, 
+   "BCHNBTC_18DEC":
+    {
+     "id": "bitcoin-cash",
+     "vs_currency": "btc",
+     "inverse": false
+    }, 
+   "BTCUSD":
+    {
+     "id": "bitcoin",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "COMPUSD":
+    {
+     "id": "compound",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "DAIPHP":
+    {
+     "id": "dai",
+     "vs_currency": "php",
+     "inverse": false
+    }, 
+   "DIGGBTC":
+    {
+     "id": "digg",
+     "vs_currency": "btc",
+     "inverse": false
+    }, 
+   "DIGGETH":
+    {
+     "id": "digg",
+     "vs_currency": "eth",
+     "inverse": false
+    }, 
+   "DIGGUSD":
+    {
+     "id": "digg",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "DPI/ETH":
+    {
+     "id": "defipulse-index",
+     "vs_currency": "eth",
+     "inverse": false
+    }, 
+   "DPI/USD":
+    {
+     "id": "defipulse-index",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "DSDUSD":
+    {
+     "id": "dynamic-set-dollar",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "ETH/BTC":
+    {
+     "id": "ethereum",
+     "vs_currency": "btc",
+     "inverse": false
+    }, 
+   "ETH/DPI":
+    {
+     "id": "defipulse-index",
+     "vs_currency": "eth",
+     "inverse": true
+    }, 
+   "ETH/INDEX":
+    {
+     "id": "index-cooperative",
+     "vs_currency": "eth",
+     "inverse": true
+    }, 
+   "ETHUSD":
+    {
+     "id": "ethereum",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "ETHYAM":
+    {
+     "id": "yam",
+     "vs_currency": "eth",
+     "inverse": true
+    }, 
+   "INDEX/ETH":
+    {
+     "id": "index-cooperative",
+     "vs_currency": "eth",
+     "inverse": false
+    }, 
+   "INDEX/USD":
+    {
+     "id": "index-cooperative",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "LINKUSD":
+    {
+     "id": "chainlink",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "OCEANUSD":
+    {
+     "id": "ocean-protocol",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "PERLUSD":
+    {
+     "id": "perlin",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "PHPDAI":
+    {
+     "id": "dai",
+     "vs_currency": "php",
+     "inverse": true
+    }, 
+   "SNXUSD":
+    {
+     "id": "synthetix-network-token",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "SUSHIUSD":
+    {
+     "id": "sushi",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "UMAUSD":
+    {
+     "id": "uma",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "USDAAVE":
+    {
+     "id": "aave",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDAMPL":
+    {
+     "id": "ampleforth",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USD/bBadger":
+    {
+     "id": "badger-sett-badger",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDDSD":
+    {
+     "id": "dynamic-set-dollar",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USD/DPI":
+    {
+     "id": "defipulse-index",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDETH":
+    {
+     "id": "ethereum",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USD/INDEX":
+    {
+     "id": "index-cooperative",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDLINK":
+    {
+     "id": "chainlink",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDOCEAN":
+    {
+     "id": "ocean-protocol",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDPERL":
+    {
+     "id": "perlin",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDSNX":
+    {
+     "id": "synthetix-network-token",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDSUSHI":
+    {
+     "id": "sushi",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDBTC":
+    {
+     "id": "bitcoin",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDBTC_18DEC":
+    {
+     "id": "bitcoin",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDUMA":
+    {
+     "id": "uma",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "UNIUSD":
+    {
+     "id": "uniswap",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDXSUSHI":
+    {
+     "id": "xsushi",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "USDYAM":
+    {
+     "id": "yam",
+     "vs_currency": "usd",
+     "inverse": true
+    }, 
+   "XSUSHIUSD":
+    {
+     "id": "xsushi",
+     "vs_currency": "usd",
+     "inverse": false
+    }, 
+   "YAMETH":
+    {
+     "id": "yam",
+     "vs_currency": "eth",
+     "inverse": false
+    }, 
+   "YAMUSD":
+    {
+     "id": "yam",
+     "vs_currency": "usd",
+     "inverse": false
+    } 
+  }
+}
