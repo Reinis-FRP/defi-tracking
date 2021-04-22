@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import argparse
 from web3 import Web3
 from dotenv import load_dotenv
 import requests
@@ -118,6 +119,10 @@ def load_creation(contract_address):
   else:
     return None
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-o', '--overwrite-cache', action='store_true', help='Overwrite cache file')
+args = parser.parse_args()
+
 # HTTPProvider:
 w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/'+alchemy_key))
 
@@ -135,11 +140,14 @@ registry_contract = load_contract(registry_address)
 
 all_registered_contracts = registry_contract.functions.getAllRegisteredContracts().call()
 
-try:
-  with open(cache_file, 'r') as f:
-    cache = json.load(f)
-except FileNotFoundError:
+if args.overwrite_cache:
   cache = {}
+else:
+  try:
+    with open(cache_file, 'r') as f:
+      cache = json.load(f)
+  except FileNotFoundError:
+    cache = {}
 
 for registered_address in all_registered_contracts:
   if registered_address in cache:
