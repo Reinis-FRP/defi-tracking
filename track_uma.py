@@ -74,6 +74,23 @@ def first_internal(contract_address):
   else:
     return None
 
+def print_cache(registered_address):
+  print('Contract: %s' % (registered_address))
+  print('  Contract type: %s' % (cache[registered_address]['type']))
+  print('  Deployed at: %s UTC' % (datetime.datetime.utcfromtimestamp(cache[registered_address]['deployed_at'])))
+  print('  Deployer: %s' % (cache[registered_address]['deployer']))
+  print('  Collateral: %s' % (cache[registered_address]['collateral_symbol']))
+  print('  Synth token: %s' % (cache[registered_address]['synth_symbol']))
+  print('  Collateral requirement: %f' % (cache[registered_address]['collateral_requirement']))
+  if cache[registered_address]['contract_state']:
+    print('  Contract state: %s' % (cache[registered_address]['contract_state']))
+  if cache[registered_address]['expires_at']:
+    print('  Expires at: %s UTC' % (datetime.datetime.utcfromtimestamp(cache[registered_address]['expires_at'])))
+  print('  Price identifier: %s' % (cache[registered_address]['price_id']))
+  print('  Minimum sponsor tokens %f' % (cache[registered_address]['min_sponsor_tokens']))
+  print('  Liquidation liveness: %f hours' % (cache[registered_address]['liquidation_liveness'] / 3600))
+  print('  Withdrawal liveness: %f hours' % (cache[registered_address]['withdrawal_liveness'] / 3600))
+
 def get_create(tx):
   tx_logs = w3.eth.getTransactionReceipt(tx["hash"]).logs
   if tx_logs == []:
@@ -126,7 +143,7 @@ except FileNotFoundError:
 
 for registered_address in all_registered_contracts:
   if registered_address in cache:
-    print(json.dumps(cache[registered_address], indent=2))
+    print_cache(registered_address)
     continue
   creation = load_creation(registered_address)
   if creation and creation["deployer"]:
@@ -146,11 +163,6 @@ for registered_address in all_registered_contracts:
     else:
       continue
 
-    print('Contract: %s' % (registered_address))
-    print('  Contract type: %s' % (contract_type))
-    print('  Deployed at: %s UTC' % (datetime.datetime.utcfromtimestamp(creation["create_time"])))
-    print('  Deployer: %s' % (creation["deployer"]))
-
     registered_contract = w3.eth.contract(address=registered_address, abi=contract_abi)
 
     collateral_address = registered_contract.functions.collateralCurrency().call()
@@ -158,14 +170,10 @@ for registered_address in all_registered_contracts:
     collateral_symbol = collateral_token.functions.symbol().call()
     collateral_decimals = collateral_token.functions.decimals().call()
 
-    print('  Collateral: %s' % (collateral_symbol))
-
     synth_address = registered_contract.functions.tokenCurrency().call()
     synth_token = w3.eth.contract(address=synth_address, abi=token_abi)
     synth_symbol = synth_token.functions.symbol().call()
     synth_decimals = synth_token.functions.decimals().call()
-
-    print('  Synth token: %s' % (synth_symbol))
 
     if contract_type == 'jarvis':
       liquidatable_data = registered_contract.functions.liquidatableData().call()
@@ -173,13 +181,10 @@ for registered_address in all_registered_contracts:
       liquidation_liveness = liquidatable_data[1]
     else:
       collateral_requirement = registered_contract.functions.collateralRequirement().call() / 10 ** DECIMALS
-    print('  Collateral requirement: %f' % (collateral_requirement))
 
     if contract_type == 'emp':
       emp_state = EMP_STATES[registered_contract.functions.contractState().call()]
       expiration = int(registered_contract.functions.expirationTimestamp().call())
-      print('  Contract state: %s' % (emp_state))
-      print('  Expires at: %s UTC' % (datetime.datetime.utcfromtimestamp(expiration)))
     else:
       emp_state = None
       expiration = None
@@ -194,10 +199,6 @@ for registered_address in all_registered_contracts:
       min_sponsor_tokens = registered_contract.functions.minSponsorTokens().call() / 10 ** synth_decimals
       liquidation_liveness = registered_contract.functions.liquidationLiveness().call()
       withdrawal_liveness = registered_contract.functions.withdrawalLiveness().call()
-    print('  Price identifier: %s' % (price_identifier))
-    print('  Minimum sponsor tokens %f' % (min_sponsor_tokens))
-    print('  Liquidation liveness: %f hours' % (liquidation_liveness / 3600))
-    print('  Withdrawal liveness: %f hours' % (withdrawal_liveness / 3600))
 
     cache[registered_address] = {
         'type': contract_type,
@@ -210,19 +211,17 @@ for registered_address in all_registered_contracts:
         'min_sponsor_tokens': min_sponsor_tokens,
         'liquidation_liveness': liquidation_liveness,
         'withdrawal_liveness': withdrawal_liveness,
-        'collateral': {
-            'address': collateral_address,
-            'symbol': collateral_symbol,
-            'decimals': collateral_decimals
-        },
-        'synth': {
-            'address': synth_address,
-            'symbol': synth_symbol,
-            'decimals': synth_decimals,
-        },
+        'collateral_address': collateral_address,
+        'collateral_address': collateral_address,
+        'collateral_symbol': collateral_symbol,
+        'collateral_decimals': collateral_decimals,
+        'synth_address': synth_address,
+        'synth_symbol': synth_symbol,
+        'synth_decimals': synth_decimals,
     }
+    print_cache(registered_address)
   else:
-    print('Other contract type: %s' % (registered_address))
+    print('Unrecognized contract type: %s' % (registered_address))
 
 with open(cache_file, 'w') as f:
   json.dump(cache, f)
