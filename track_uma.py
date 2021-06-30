@@ -91,6 +91,8 @@ def print_cache(registered_address):
   print('  Minimum sponsor tokens %f' % (cache[registered_address]['min_sponsor_tokens']))
   print('  Liquidation liveness: %f hours' % (cache[registered_address]['liquidation_liveness'] / 3600))
   print('  Withdrawal liveness: %f hours' % (cache[registered_address]['withdrawal_liveness'] / 3600))
+  print('  Locked collateral: %f %s' % (cache[registered_address]['collateral_locked'], cache[registered_address]['collateral_symbol']))
+  print('  Synths minted: %f %s' % (cache[registered_address]['synth_minted'], cache[registered_address]['synth_symbol']))
 
 def get_create(tx):
   tx_logs = w3.eth.getTransactionReceipt(tx["hash"]).logs
@@ -177,11 +179,13 @@ for registered_address in all_registered_contracts:
     collateral_token = w3.eth.contract(address=collateral_address, abi=token_abi)
     collateral_symbol = collateral_token.functions.symbol().call()
     collateral_decimals = collateral_token.functions.decimals().call()
+    collateral_locked = registered_contract.functions.totalPositionCollateral().call()[0] / 10 ** collateral_decimals
 
     synth_address = registered_contract.functions.tokenCurrency().call()
     synth_token = w3.eth.contract(address=synth_address, abi=token_abi)
     synth_symbol = synth_token.functions.symbol().call()
     synth_decimals = synth_token.functions.decimals().call()
+    synth_minted = synth_token.functions.totalSupply().call() / 10 ** synth_decimals
 
     if contract_type == 'jarvis':
       liquidatable_data = registered_contract.functions.liquidatableData().call()
@@ -223,9 +227,11 @@ for registered_address in all_registered_contracts:
         'collateral_address': collateral_address,
         'collateral_symbol': collateral_symbol,
         'collateral_decimals': collateral_decimals,
+        'collateral_locked': collateral_locked,
         'synth_address': synth_address,
         'synth_symbol': synth_symbol,
         'synth_decimals': synth_decimals,
+        'synth_minted': synth_minted,
     }
     print_cache(registered_address)
   else:
