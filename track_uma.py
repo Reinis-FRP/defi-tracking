@@ -32,6 +32,9 @@ PERP_CREATE = 'CreatedPerpetual(address,address)'
 # Jarvis contract creation event signature:
 JARVIS_CREATE = 'DerivativeDeployed(uint8,address,address)'
 
+# Jarvis contract creation event signature:
+JARVIS_SELF_CREATE = 'SelfMintingDerivativeDeployed(uint8,address)'
+
 # Possible EMP contract states:
 EMP_STATES = ('Open', 'ExpiredPriceRequested', 'ExpiredPriceReceived')
 
@@ -44,8 +47,14 @@ emp_abi = []
 # Use the same ABI for all Perpetual contracts (will fetch it for the first Perpetual discovered):
 perp_abi = []
 
-# Use the same ABI for all Jarvis contracts (will fetch it for the first Jarvis discovered):
-jarvis_abi = []
+# Use the same ABI for all Jarvis v1 contracts (will fetch it for the first Jarvis v1 discovered):
+jarvis_v1_abi = []
+
+# Use the same ABI for all Jarvis v2 contracts (will fetch it for the first Jarvis v2 discovered):
+jarvis_v2_abi = []
+
+# Use the same ABI for all Jarvis Self Minting contracts (will fetch it for the first Jarvis Self Minting discovered):
+jarvis_self_abi = []
 
 # Cache json file
 cache_file = 'cache.json'
@@ -105,8 +114,12 @@ def get_create(tx):
     if event["topics"][0] == create_perp_event_hash:
       if event["address"].lower() == tx["from"]:
         for perp_event in tx_logs:
-          if perp_event["topics"][0] == create_jarvis_event_hash: 
-            return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis'}
+          if perp_event["topics"][0] == create_jarvis_event_hash and int(perp_event["topics"][1].hex(), 16) == 1: 
+            return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_v1'}
+          elif perp_event["topics"][0] == create_jarvis_event_hash and int(perp_event["topics"][1].hex(), 16) == 2: 
+            return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_v2'}
+          elif perp_event["topics"][0] == create_jarvis_self_event_hash:
+            return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_self'}
         return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'perp'}
   return None
 
@@ -131,6 +144,7 @@ w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/'+alchemy_key)
 create_emp_event_hash = w3.keccak(text=EMP_CREATE)
 create_perp_event_hash = w3.keccak(text=PERP_CREATE)
 create_jarvis_event_hash = w3.keccak(text=JARVIS_CREATE)
+create_jarvis_self_event_hash = w3.keccak(text=JARVIS_SELF_CREATE)
 
 token_abi = load_abi(weth_address)
 
@@ -166,10 +180,18 @@ for registered_address in all_registered_contracts:
       if perp_abi == []:
         perp_abi = load_abi(registered_address)
       contract_abi = perp_abi
-    elif contract_type == "jarvis":
-      if jarvis_abi == []:
-        jarvis_abi = load_abi(registered_address)
-      contract_abi = jarvis_abi
+    elif contract_type == "jarvis_v1":
+      if jarvis_v1_abi == []:
+        jarvis_v1_abi = load_abi(registered_address)
+      contract_abi = jarvis_v1_abi
+    elif contract_type == "jarvis_v2":
+      if jarvis_v2_abi == []:
+        jarvis_v2_abi = load_abi(registered_address)
+      contract_abi = jarvis_v2_abi
+    elif contract_type == "jarvis_self":
+      if jarvis_self_abi == []:
+        jarvis_self_abi = load_abi(registered_address)
+      contract_abi = jarvis_self_abi
     else:
       continue
 
@@ -179,7 +201,11 @@ for registered_address in all_registered_contracts:
     collateral_token = w3.eth.contract(address=collateral_address, abi=token_abi)
     collateral_symbol = collateral_token.functions.symbol().call()
     collateral_decimals = collateral_token.functions.decimals().call()
-    collateral_locked = registered_contract.functions.totalPositionCollateral().call()[0] / 10 ** collateral_decimals
+
+    if contract_type == 'jarvis_self':
+      collateral_locked = registered_contract.functions.totalPositionCollateral().call() / 10 ** collateral_decimals
+    else:
+      collateral_locked = registered_contract.functions.totalPositionCollateral().call()[0] / 10 ** collateral_decimals
 
     synth_address = registered_contract.functions.tokenCurrency().call()
     synth_token = w3.eth.contract(address=synth_address, abi=token_abi)
@@ -187,7 +213,7 @@ for registered_address in all_registered_contracts:
     synth_decimals = synth_token.functions.decimals().call()
     synth_minted = synth_token.functions.totalSupply().call() / 10 ** synth_decimals
 
-    if contract_type == 'jarvis':
+    if contract_type == 'jarvis_v1' or contract_type == 'jarvis_v2' or contract_type == 'jarvis_self':
       liquidatable_data = registered_contract.functions.liquidatableData().call()
       collateral_requirement = liquidatable_data[2][0] / 10 ** DECIMALS
       liquidation_liveness = liquidatable_data[1]
@@ -201,11 +227,16 @@ for registered_address in all_registered_contracts:
       emp_state = None
       expiration = None
 
-    if contract_type == 'jarvis':
+    if contract_type == 'jarvis_v1':
       position_manager_data = registered_contract.functions.positionManagerData().call()
       price_identifier = position_manager_data[1].strip(b'\x00').decode()
       withdrawal_liveness = position_manager_data[2]
       min_sponsor_tokens = position_manager_data[3][0]
+    elif contract_type == 'jarvis_self' or contract_type == 'jarvis_v2':
+      position_manager_data = registered_contract.functions.positionManagerData().call()
+      price_identifier = position_manager_data[2].strip(b'\x00').decode()
+      withdrawal_liveness = position_manager_data[3]
+      min_sponsor_tokens = position_manager_data[4][0]
     else:
       price_identifier = registered_contract.functions.priceIdentifier().call().strip(b'\x00').decode()
       min_sponsor_tokens = registered_contract.functions.minSponsorTokens().call() / 10 ** synth_decimals
