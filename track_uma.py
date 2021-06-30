@@ -17,7 +17,9 @@ etherscan_api = "https://api.etherscan.io/api"
 
 # Get API keys from .env file:
 etherscan_key = os.environ.get("ETHERSCAN_KEY")
-alchemy_key = os.environ.get("ALCHEMY_KEY")
+
+# ETH node API:
+eth_node_api = os.environ.get("ETH_NODE_API")
 
 # Some tokens don't have ABI available, hence, use WETH for all ERC-20 tokens:
 weth_address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -174,7 +176,7 @@ parser.add_argument("-t", "--timestamp", type=str, help="fetch balances ending a
 args = parser.parse_args()
 
 # HTTPProvider:
-w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/'+alchemy_key))
+w3 = Web3(Web3.HTTPProvider(eth_node_api))
 
 if args.timestamp:
   timestamp = int(args.timestamp)
