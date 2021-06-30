@@ -3,6 +3,7 @@
 import time
 import datetime
 import json
+import csv
 import argparse
 from web3 import Web3
 from dotenv import load_dotenv
@@ -59,6 +60,9 @@ jarvis_self_abi = []
 
 # Cache json file
 cache_file = 'cache.json'
+
+# CSV file name
+csv_name = 'contracts.csv'
 
 def load_abi(abi_address):
   API_ENDPOINT = etherscan_api+"?module=contract&action=getabi&address="+str(abi_address)+"&apikey="+etherscan_key
@@ -141,6 +145,29 @@ def get_block(timestamp):
   response = r.json()
   return int(response["result"])
 
+def write_csv():
+  csv_file = open(csv_name, 'w')
+  csv_writer = csv.writer(csv_file, delimiter='\t')
+  first_contract = list(cache.keys())[0]
+  header = ["registered_address"]
+  for column in cache[first_contract]:
+    if isinstance(cache[first_contract][column], dict):
+      for subcolumn in cache[first_contract][column]:
+        header.append(column+"_"+subcolumn)
+    else:
+      header.append(column)
+  csv_writer.writerow(header)
+  for registered_address in cache:
+    row = [registered_address]
+    for column in cache[registered_address].values():
+      if isinstance(column, dict):
+        for subcolumn in column.values():
+          row.append(subcolumn)
+      else:
+        row.append(column)
+    csv_writer.writerow(row)
+  csv_file.close()
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-o', '--overwrite-cache', action='store_true', help='Overwrite cache file')
 parser.add_argument("-t", "--timestamp", type=str, help="fetch balances ending at this timestamp")
@@ -155,7 +182,6 @@ if args.timestamp:
 else:
   timestamp = int(time.time())
   block = 'latest'
-print(block)
 
 create_emp_event_hash = w3.keccak(text=EMP_CREATE)
 create_perp_event_hash = w3.keccak(text=PERP_CREATE)
@@ -286,3 +312,5 @@ for registered_address in all_registered_contracts:
 
 with open(cache_file, 'w') as f:
   json.dump(cache, f)
+
+write_csv()
