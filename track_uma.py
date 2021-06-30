@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import datetime
 import json
 import argparse
@@ -134,12 +135,27 @@ def load_creation(contract_address):
   else:
     return None
 
+def get_block(timestamp):
+  API_ENDPOINT = etherscan_api+"?module=block&action=getblocknobytime&closest=before&timestamp="+str(timestamp)+"&apikey="+etherscan_key
+  r = requests.get(url = API_ENDPOINT)
+  response = r.json()
+  return int(response["result"])
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-o', '--overwrite-cache', action='store_true', help='Overwrite cache file')
+parser.add_argument("-t", "--timestamp", type=str, help="fetch balances ending at this timestamp")
 args = parser.parse_args()
 
 # HTTPProvider:
 w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/'+alchemy_key))
+
+if args.timestamp:
+  timestamp = int(args.timestamp)
+  block = get_block(timestamp)
+else:
+  timestamp = int(time.time())
+  block = 'latest'
+print(block)
 
 create_emp_event_hash = w3.keccak(text=EMP_CREATE)
 create_perp_event_hash = w3.keccak(text=PERP_CREATE)
@@ -171,6 +187,9 @@ for registered_address in all_registered_contracts:
     continue
   creation = load_creation(registered_address)
   if creation and creation["deployer"]:
+    if creation["create_time"] > timestamp:
+      print('Contract %s created after requested timestamp, stopping' % (registered_address))
+      break
     contract_type = creation["type"]
     if contract_type == "emp":
       if emp_abi == []:
@@ -202,38 +221,35 @@ for registered_address in all_registered_contracts:
     collateral_symbol = collateral_token.functions.symbol().call()
     collateral_decimals = collateral_token.functions.decimals().call()
 
-    if contract_type == 'jarvis_self':
-      collateral_locked = registered_contract.functions.totalPositionCollateral().call() / 10 ** collateral_decimals
-    else:
-      collateral_locked = registered_contract.functions.totalPositionCollateral().call()[0] / 10 ** collateral_decimals
+    collateral_locked = registered_contract.functions.pfc().call(block_identifier=block)[0] / 10 ** collateral_decimals
 
     synth_address = registered_contract.functions.tokenCurrency().call()
     synth_token = w3.eth.contract(address=synth_address, abi=token_abi)
     synth_symbol = synth_token.functions.symbol().call()
     synth_decimals = synth_token.functions.decimals().call()
-    synth_minted = synth_token.functions.totalSupply().call() / 10 ** synth_decimals
+    synth_minted = synth_token.functions.totalSupply().call(block_identifier=block) / 10 ** synth_decimals
 
     if contract_type == 'jarvis_v1' or contract_type == 'jarvis_v2' or contract_type == 'jarvis_self':
-      liquidatable_data = registered_contract.functions.liquidatableData().call()
+      liquidatable_data = registered_contract.functions.liquidatableData().call(block_identifier=block)
       collateral_requirement = liquidatable_data[2][0] / 10 ** DECIMALS
       liquidation_liveness = liquidatable_data[1]
     else:
       collateral_requirement = registered_contract.functions.collateralRequirement().call() / 10 ** DECIMALS
 
     if contract_type == 'emp':
-      emp_state = EMP_STATES[registered_contract.functions.contractState().call()]
+      emp_state = EMP_STATES[registered_contract.functions.contractState().call(block_identifier=block)]
       expiration = int(registered_contract.functions.expirationTimestamp().call())
     else:
       emp_state = None
       expiration = None
 
     if contract_type == 'jarvis_v1':
-      position_manager_data = registered_contract.functions.positionManagerData().call()
+      position_manager_data = registered_contract.functions.positionManagerData().call(block_identifier=block)
       price_identifier = position_manager_data[1].strip(b'\x00').decode()
       withdrawal_liveness = position_manager_data[2]
       min_sponsor_tokens = position_manager_data[3][0]
     elif contract_type == 'jarvis_self' or contract_type == 'jarvis_v2':
-      position_manager_data = registered_contract.functions.positionManagerData().call()
+      position_manager_data = registered_contract.functions.positionManagerData().call(block_identifier=block)
       price_identifier = position_manager_data[2].strip(b'\x00').decode()
       withdrawal_liveness = position_manager_data[3]
       min_sponsor_tokens = position_manager_data[4][0]
