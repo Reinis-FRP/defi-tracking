@@ -32,10 +32,9 @@ Set `ETHERSCAN_KEY` and `ALCHEMY_KEY` variables in `.env` file
 * closing position before expiration and rebalancing excess/deficit synth tokens from the pool or
 * waiting for expiration, withdrawing both pairs from the pool and calling `settleExpired` on the EMP contract
 
-[track_uma.py](./track_uma.py) fetches all deployed contracts and their parameters from UMA protocol on-chain data.
+[track_uma.py](./track_uma.py) fetches all deployed contracts and their parameters from UMA protocol on-chain data. Use -t option to fetch historical collateral and synths balances.
 
 TODO:
 
 * optimize fetching all parameters from create transaction
 * format output as CSV
-* add current minted amounts and collateral locked
