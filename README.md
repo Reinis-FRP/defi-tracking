@@ -19,7 +19,7 @@ pip install web3 python-dotenv
 
 ## Configure API keys
 
-Set `ETHERSCAN_KEY` and `ALCHEMY_KEY` variables in `.env` file
+Set `ETHERSCAN_KEY` and `ETH_NODE_API` variables in `.env` file
 
 ## Scripts
 
@@ -37,3 +37,5 @@ Set `ETHERSCAN_KEY` and `ALCHEMY_KEY` variables in `.env` file
 TODO:
 
 * optimize fetching all parameters from create transaction
+
+[block_timestamp](./block_timestamp) converts timestamp to latest block number and vice versa.

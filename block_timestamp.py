@@ -15,7 +15,9 @@ etherscan_api = "https://api.etherscan.io/api"
 
 # Get API keys from .env file:
 etherscan_key = os.environ.get("ETHERSCAN_KEY")
-alchemy_key = os.environ.get("ALCHEMY_KEY")
+
+# ETH node API:
+eth_node_api = os.environ.get("ETH_NODE_API")
 
 def get_block(timestamp):
   API_ENDPOINT = etherscan_api+"?module=block&action=getblocknobytime&closest=before&timestamp="+str(timestamp)+"&apikey="+etherscan_key
@@ -29,7 +31,7 @@ parser.add_argument("-b", "--block", type=int, help="get the block timestamp")
 args = parser.parse_args()
 
 # HTTPProvider:
-w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/'+alchemy_key))
+w3 = Web3(Web3.HTTPProvider(eth_node_api))
 
 if args.block:
   block = args.block
