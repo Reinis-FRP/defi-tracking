@@ -38,4 +38,4 @@ TODO:
 
 * optimize fetching all parameters from create transaction
 
-[block_timestamp](./block_timestamp) converts timestamp to latest block number and vice versa.
+[block_timestamp.py](./block_timestamp.py) converts timestamp to latest block number and vice versa.
