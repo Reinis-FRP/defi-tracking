@@ -95,6 +95,7 @@ def print_cache(registered_address):
   print('Contract: %s' % (registered_address))
   print('  Contract type: %s' % (cache[registered_address]['type']))
   print('  Deployed at: %s UTC' % (datetime.datetime.utcfromtimestamp(cache[registered_address]['deployed_at'])))
+  print('  Creator: %s' % (cache[registered_address]['creator']))
   print('  Deployer: %s' % (cache[registered_address]['deployer']))
   print('  Collateral: %s' % (cache[registered_address]['collateral_symbol']))
   print('  Synth token: %s' % (cache[registered_address]['synth_symbol']))
@@ -117,17 +118,17 @@ def get_create(tx):
   for event in tx_logs:
     if event["topics"][0] == create_emp_event_hash:
       if event["address"].lower() == tx["from"]:
-        return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'emp'}
+        return {'creator': event["address"], 'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'emp'}
     if event["topics"][0] == create_perp_event_hash:
       if event["address"].lower() == tx["from"]:
         for perp_event in tx_logs:
           if perp_event["topics"][0] == create_jarvis_event_hash and int(perp_event["topics"][1].hex(), 16) == 1: 
-            return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_v1'}
+            return {'creator': event["address"], 'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_v1'}
           elif perp_event["topics"][0] == create_jarvis_event_hash and int(perp_event["topics"][1].hex(), 16) == 2: 
-            return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_v2'}
+            return {'creator': event["address"], 'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_v2'}
           elif perp_event["topics"][0] == create_jarvis_self_event_hash:
-            return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_self'}
-        return {'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'perp'}
+            return {'creator': event["address"], 'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'jarvis_self'}
+        return {'creator': event["address"], 'deployer': w3.toChecksumAddress('0x'+event["topics"][2].hex()[26:]), 'type': 'perp'}
   return None
 
 def load_creation(contract_address):
@@ -135,7 +136,7 @@ def load_creation(contract_address):
   if creation_tx:
     create = get_create(creation_tx)
     if create:
-      return {'create_time': int(creation_tx["timeStamp"]), 'deployer': create['deployer'], 'type': create['type']}
+      return {'create_time': int(creation_tx["timeStamp"]), 'creator': create['creator'], 'deployer': create['deployer'], 'type': create['type']}
     else:
       return None
   else:
@@ -289,6 +290,7 @@ for registered_address in all_registered_contracts:
 
     cache[registered_address] = {
         'type': contract_type,
+        'creator': creation['creator'],
         'deployer': creation['deployer'],
         'deployed_at': creation['create_time'],
         'collateral_requirement': collateral_requirement,
